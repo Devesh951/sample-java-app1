@@ -55,6 +55,18 @@
     </snapshotRepository>
 </distributionManagement>
 
+<servers>
+    <server>
+        <id>nexus-releases</id>
+        <username>devesh</username>
+        <password>devesh</password>
+    </server>
+    <server>
+        <id>nexus-snapshots</id>
+        <username>devesh</username>
+        <password>devesh</password>
+    </server>
+</servers>
 
 
 
