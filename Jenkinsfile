@@ -15,7 +15,7 @@ pipeline {
         // This can be http or https
         NEXUS_PROTOCOL = "http"
         // Where your Nexus is running
-        NEXUS_URL = "http://18.207.93.13:8081/"
+        NEXUS_URL = "18.207.93.13:8081"
         // Repository where we will upload the artifact
         NEXUS_REPOSITORY = "robinrepo"
         // Jenkins credential id to authenticate to Nexus OSS
@@ -58,7 +58,6 @@ pipeline {
                         echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}";
 
                         nexusArtifactUploader(
-                        nexusArtifactUploader(
                         nexusVersion: NEXUS_VERSION,
                         protocol: NEXUS_PROTOCOL,
                         nexusUrl: NEXUS_URL,
@@ -81,7 +80,8 @@ pipeline {
                             ]
                         );
 
-                    } else {
+                    } 
+                            else {
                         error "*** File: ${artifactPath}, could not be found";
                     }
                 }
