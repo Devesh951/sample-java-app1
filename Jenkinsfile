@@ -1,93 +1,43 @@
 pipeline {
-
-    agent {
-        label "main"
+    agent any
+ 
+    tools {
+        maven 'Maven' // This should match the name of your Maven installation in Jenkins Global Tool Configuration
     }
-
- //   tools {
-        // Note: this should match with the tool name configured in your jenkins instance (JENKINS_URL/configureTools/)
-   //     maven "Maven 3.8.7"
-    //}
-
+ 
     environment {
-        // This can be nexus3 or nexus2
-        NEXUS_VERSION = "nexus3"
-        // This can be http or https
-        NEXUS_PROTOCOL = "http"
-        // Where your Nexus is running
-        NEXUS_URL = "18.207.93.13:8081"
-        // Repository where we will upload the artifact
-        NEXUS_REPOSITORY = "robinrepo"
-        // Jenkins credential id to authenticate to Nexus OSS
-        NEXUS_CREDENTIAL_ID = "robin_id"
+        // Use the credentials ID that you have set up in Jenkins for Nexus
+        NEXUS_CREDENTIALS = credentials('robin_id') 
+        // Nexus repository URL where the artifact will be deployed
+        MAVEN_REPO_URL = 'http://18.207.93.13:8081/repository/robin/' 
     }
+ 
     stages {
-        stage("clone code") {
+        stage('Build') {
             steps {
-                script {
-                    // Let's clone the source
-                    git 'https://github.com/Devesh951/sample-java-app1.git';
+                // This will clean the project and build the package
+                sh 'mvn clean package'
+            }
+        }
+ 
+        stage('Deploy to Nexus') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: env.NEXUS_CREDENTIALS, passwordVariable: 'NEXUS_PASS', usernameVariable: 'NEXUS_USER')]) {
+                    sh """
+                       mvn deploy:deploy-file \
+                           -Durl=${env.MAVEN_REPO_URL} \
+                           -DrepositoryId=nexus \
+                           -Dfile=target/your-artifact.jar \
+                           -DgroupId=com.yourcompany \
+                           -DartifactId=your-artifact \
+                           -Dversion=1.0.0 \
+                           -Dpackaging=jar \
+                           -DgeneratePom=true \
+                           -Dusername=$NEXUS_USER \
+                           -Dpassword=$NEXUS_PASS
+                    """
                 }
             }
         }
-
-        stage("mvn build") {
-            steps {
-                script {
-                    // If you are using Windows then you should use "bat" step
-                    // Since unit testing is out of the scope we skip them
-                    sh "mvn package -DskipTests=true"
-                }
-            }
-        }
-        stage("publish to nexus") {
-            steps {
-                script {
-                    // Read POM xml file using 'readMavenPom' step , this step 'readMavenPom' is included in: https://plugins.jenkins.io/pipeline-utility-steps
-                    pom = readMavenPom file: "pom.xml";
-                    // Find built artifact under target folder
-                    filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
-                    // Print some info from the artifact found
-                    echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
-                    // Extract the path from the File found
-                    artifactPath = filesByGlob[0].path;
-                    // Assign to a boolean response verifying If the artifact name exists
-                    artifactExists = fileExists artifactPath;
-
-                    if(artifactExists) {
-                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}";
-
-                        nexusArtifactUploader(
-                        nexusVersion: NEXUS_VERSION,
-                        protocol: NEXUS_PROTOCOL,
-                        nexusUrl: NEXUS_URL,
-                        groupId: pom.groupId,
-                        version: pom.version,
-                        repository: NEXUS_REPOSITORY,
-                        credentialsId: NEXUS_CREDENTIAL_ID,
-                        artifacts: [
-                            // Artifact generated such as .jar, .ear and .war files.
-                                [artifactId: pom.artifactId,
-                                classifier: '',
-                                file: artifactPath,
-                                type: pom.packaging],
-
-                                // Lets upload the pom.xml file for additional information for Transitive dependencies
-                                [artifactId: pom.artifactId,
-                                classifier: '',
-                                file: "pom.xml",
-                                type: "pom"]
-                            ]
-                        );
-
-                    } 
-                            else {
-                        error "*** File: ${artifactPath}, could not be found";
-                    }
-                }
-            }
-        }
-
     }
 }
-
