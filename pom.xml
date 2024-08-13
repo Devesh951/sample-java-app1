@@ -35,16 +35,7 @@
 		</dependency>
 	</dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
-	
-<distributionManagement>
+	<distributionManagement>
     <repository>
         <id>nexus-releases</id>
         <url>http://172.21.172.142:8081/#admin/repository/maven-releases/</url>
@@ -53,10 +44,15 @@
         <id>nexus-snapshots</id>
         <url>http://172.21.172.142:8081/#admin/repository/maven-snapshots/</url>
     </snapshotRepository>
-</distributionManagement>
-
-
-
-
+    </distributionManagement>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
