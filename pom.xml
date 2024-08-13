@@ -35,17 +35,6 @@
 		</dependency>
 	</dependencies>
 
-	<distributionManagement>
-    <repository>
-        <id>nexus-releases</id>
-        <url>http://172.21.172.142:8081/#admin/repository/maven-releases/</url>
-    </repository>
-    <snapshotRepository>
-        <id>nexus-snapshots</id>
-        <url>http://172.21.172.142:8081/#admin/repository/maven-snapshots/</url>
-    </snapshotRepository>
-    </distributionManagement>
-	
 	<build>
 		<plugins>
 			<plugin>
